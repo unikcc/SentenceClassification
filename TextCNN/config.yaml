@@ -1,0 +1,46 @@
+#data_list: ['MPQA', 'SST2', 'Subj', 'TREC', 'MR', 'CustomReview']
+dirname: ../data
+embedding_path: ['~/opt/embeddings/GoogleNews-vectors-negative300.txt',
+                 '../data/embeddings/GoogleNews-vectors-negative300.txt.filter']
+datatype:
+  binary: ['MR', 'Subj']
+  train_test: ['SST2']
+data_list:
+  MR:
+    pos: mr.pos
+    neg: mr.neg
+  SST2:
+    train: stsa.binary.train
+    test: stsa.binary.test
+    dev: stsa.binary.dev
+  Subj:
+    pos: subj.subjective
+    neg: obj.objective
+  TREC:
+    train: TREC.train
+    test: TREC.test
+  CustomReview:
+    pos: custrev.pos
+    neg: custrev.neg
+  MPQA:
+    pos: mpqa.pos
+    neg: mpqa.neg
+seed: 42
+valid_rate: 0.2
+res_path: ../data/embeddings/{}.pkl
+best_model_path: ../data/save
+cuda_index: 1
+output_channels: 100
+max_length: 100
+batch_size: 50
+epoch_size: 256
+lr: 0.0005
+patience: 100
+l2: 1e-5
+max_grad_norm: 3.0
+esp: 1e-5
+kfold: 10
+dropout: 0.5
+filters: [3, 4, 5]
+# train_mode: ['random', 'static', 'fine-tuned']
+train_mode: static
