@@ -56,6 +56,6 @@
 
 |模型选项|SST-2|MR|
 | -- | -- | -- |
-| CNN-rand | 80.78 |  |
+| CNN-rand | 80.78 | 77.1 |
 | CNN-static | 85.83 | 80.49  |
-| CNN-fine-tuned| 84.68 |   |
+| CNN-fine-tuned| 84.68 | 79.88  |
