@@ -231,7 +231,7 @@ class Template:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default='SST-2')
+    parser.add_argument('--dataset', type=str, default='MR')
     args = parser.parse_args()
     template = Template(args)
     template.forward()

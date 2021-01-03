@@ -1,9 +1,11 @@
 ## SentenceClassification Model implemented with PyTorch
 
-**简介**
+### 项目简介
 本项目复现了用于文本分类的经典模型，详细介绍见：[论文复现TextCNN(基于PyTorch)](https://www.jianshu.com/p/ed0a82780c20)
 
 目前只有TextCNN一个，后续会添加LSTM、BiLSTM、FastText等经典模型。
+
+### 运行代码
 
 **下载代码**
 
@@ -41,3 +43,19 @@
 **其他**
 
 `config.yaml`中可以修改相应配置，实现不同数据集的预测，目前支持`SST-2`和`MR`，其中`MR`是十折交叉验证；
+
+### 复现结果
++ 原始论文
+
+|模型选项|SST-2|MR|
+| -- | -- | -- |
+| CNN-rand | 82.7 | 76.1 |
+| CNN-static | 86.8 | 81.0 |
+| CNN-fine-tuned| 87.2 | 81.5 |
++ 复现结果
+
+|模型选项|SST-2|MR|
+| -- | -- | -- |
+| CNN-rand | 80.78 |  |
+| CNN-static | 85.83 | 80.49  |
+| CNN-fine-tuned| 84.68 |   |
