@@ -43,4 +43,4 @@ kfold: 10
 dropout: 0.5
 filters: [3, 4, 5]
 # train_mode: ['random', 'static', 'fine-tuned']
-train_mode: fine-tuned
+train_mode: random

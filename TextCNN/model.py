@@ -19,6 +19,7 @@ class TextCNN(nn.Module):
         super(TextCNN, self).__init__()
         self.config = config
         self.embeddings = nn.Embedding(alphabet.size(), emb_dim)
+        # self.embeddings.weight.requires_grad = False
         if config['train_mode'] == 'static':
             self.embeddings = self.embeddings.from_pretrained(torch.from_numpy(alphabet.pretrained_emb))
         elif config['train_mode'] == 'fine-tuned':

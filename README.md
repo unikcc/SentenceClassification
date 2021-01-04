@@ -51,13 +51,10 @@
 **TextCNN**
 + 原始论文
 
+复现结果（括号内为复现结果）
 |模型选项|SST-2|MR|
 | -- | -- | -- |
-| CNN-rand | 82.7 | 76.1 |
-| CNN-static | 86.8 | 81.0 |
-| CNN-fine-tuned| 87.2 | 81.5 |
-| CNN-rand **-our**| 80.78 | 77.1 |
-| CNN-static **-our** | 85.83 | 80.49  |
-| CNN-fine-tuned **-our** | 84.68 | 79.88  |
-| Bert-base-cased | 93.5 |  |
-| Bert-base-cased **-our** | 90.57 |  |
+| CNN-rand | **82.7**  (80.78) | 76.1  (**77.10**) |
+| CNN-static | **86.8**  (85.83) | **81.0**  (80.49) |
+| CNN-fine-tuned| **87.2**  (84.68) | **81.5**  (79.88) |
+|Bert-base-cased | **93.5** (90.57) | |
