@@ -1,7 +1,8 @@
 #data_list: ['MPQA', 'SST2', 'Subj', 'TREC', 'MR', 'CustomReview']
 dirname: ../data
+# 两个保证有一个有embedding文件就好
 embedding_path: ['../../../opt/embeddings/GoogleNews-vectors-negative300.txt',
-                 '../data/embeddings/GoogleNews-vectors-negative300.txt.filter']
+                 '../data/embeddings/GoogleNews-vectors-negative300.txt']
 datatype:
   binary: ['MR', 'Subj']
   train_test: ['SST2']
@@ -43,4 +44,4 @@ kfold: 10
 dropout: 0.5
 filters: [3, 4, 5]
 # train_mode: ['random', 'static', 'fine-tuned']
-train_mode: random
+train_mode: fine-tuned

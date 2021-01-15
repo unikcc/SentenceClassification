@@ -127,6 +127,8 @@ class Template:
                 print(w.shape, w.requires_grad)
             self.optimizer = Adam(filter(lambda x: x.requires_grad, self.model.parameters()), lr=self.config['lr'], weight_decay=float(self.config['l2']), eps=float(self.config['esp']))
             self.metircs = Metric()
+            for name, im in self.model.named_parameters():
+                print(im.shape, name, im.requires_grad)
             score = self.forward(train_data, valid_data, test_data)
             scores.append(score)
         print('| valid best | global best|')
