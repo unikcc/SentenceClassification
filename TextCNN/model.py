@@ -15,10 +15,10 @@ from alphabet import Alphabet
 
 
 class TextCNN(nn.Module):
-    def __init__(self, config, alphabet : Alphabet, emb_dim, device):
+    def __init__(self, config, alphabet : Alphabet):
         super(TextCNN, self).__init__()
         self.config = config
-        self.embeddings = nn.Embedding(alphabet.size(), emb_dim)
+        self.embeddings = nn.Embedding(alphabet.size(), config.emb_dim)
         # self.embeddings.weight.requires_grad = False
         if config['train_mode'] == 'static':
             self.embeddings = self.embeddings.from_pretrained(torch.from_numpy(alphabet.pretrained_emb))
@@ -27,14 +27,14 @@ class TextCNN(nn.Module):
 
         filters = config['filters']
         self.cnn = nn.ModuleList([nn.Sequential(
-            nn.Conv1d(1, config['output_channels'], [w, emb_dim]),
+            nn.Conv1d(1, config['output_channels'], [w, config.emb_dim]),
             nn.ReLU(),
             nn.AdaptiveMaxPool2d(1)) for w in filters])
 
         self.linear = nn.Linear(config['output_channels'] * len(filters), 2, bias=True)
         self.dropout = nn.Dropout(config['dropout'])
         self.relu = nn.ReLU()
-        self.scale = np.sqrt(3.0 / emb_dim)
+        self.scale = np.sqrt(3.0 / config.emb_dim)
         self.apply(self._init_esim_weights)
 
     def _init_esim_weights(self, module):

@@ -40,8 +40,8 @@
 
 `python preprocess.py`
 
-默认为MR数据集，运行下列命令可以处理SST2数据集
-`python preprocess.py --dataset SST2`
+默认为MR数据集，运行下列命令可以处理MR数据集
+`python preprocess.py --dataset MR`
 
 **运行训练+测试**
 

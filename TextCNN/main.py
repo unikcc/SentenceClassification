@@ -22,12 +22,13 @@ from sklearn.metrics import accuracy_score
 import numpy as np
 import random
 import os
+from attrdict import AttrDict
 
 
 
 class Template:
     def __init__(self, args):
-        self.config = yaml.load(open('config.yaml', 'r'), Loader=yaml.FullLoader)
+        self.config = AttrDict(yaml.load(open('config.yaml', 'r'), Loader=yaml.FullLoader))
         self.config['dataset'] = args.dataset
         self.device = torch.device('cuda:{}'.format(self.config['cuda_index']) if torch.cuda.is_available() else 'cpu')
         if not os.path.exists(self.config['best_model_path']):
@@ -113,7 +114,7 @@ class Template:
 
 
     def main(self):
-        processed_list, alphabet, _, emb_dim = pkl.load(open(self.config['res_path'].format(self.config['dataset']), 'rb'))
+        processed_list, alphabet = pkl.load(open(self.config['res_path'].format(self.config['dataset']), 'rb'))
         if isinstance(processed_list, dict):
             processed_list = [processed_list]
         scores = []
@@ -122,7 +123,7 @@ class Template:
             valid_data = MyDatasetLoader(self.config, data_list, 'valid').get_data()
             test_data = MyDatasetLoader(self.config, data_list, 'test').get_data()
 
-            self.model = TextCNN(self.config, alphabet, emb_dim, self.device).to(self.device)
+            self.model = TextCNN(self.config, alphabet).to(self.device)
             for w in self.model.parameters():
                 print(w.shape, w.requires_grad)
             self.optimizer = Adam(filter(lambda x: x.requires_grad, self.model.parameters()), lr=self.config['lr'], weight_decay=float(self.config['l2']), eps=float(self.config['esp']))
@@ -138,15 +139,10 @@ class Template:
         if len(scores) > 1:
             print("valid Avg\tglobal Avg")
             print("| {:.4f} | {:.4f} |".format(np.mean([w[0] for w in scores]), np.mean([w[1] for w in scores])))
-        # self.optimizer = Adam(self.model.parameters(), lr=self.config['lr'], weight_decay=float(self.config['l2']), eps=float(self.config['esp']))
-        
-        # self.optimizer = Adagrad(filter(lambda x: x.requires_grad, self.model.parameters()), lr=self.config['learning_rate'], weight_decay=1e-5)
-        # self.optimizer = Adam(filter(lambda x: x.requires_grad, self.model.parameters()), lr=self.config['lr'], weight_decay=float(self.config['l2']), eps=float(self.config['esp']))
-        # self.optimizer = Adadelta(filter(lambda x: x.requires_grad, self.model.parameters()), rho=0.95, eps=1e-5, weight_decay=float(self.config['l2']))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default='MR')
+    parser.add_argument('--dataset', type=str, default='SST2')
     args = parser.parse_args()
     template = Template(args)
     template.main()

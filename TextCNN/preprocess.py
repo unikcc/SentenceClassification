@@ -16,11 +16,12 @@ import numpy as np
 from sklearn.model_selection import train_test_split, KFold, StratifiedKFold
 import pickle as pkl
 from tqdm import tqdm
+from attrdict import AttrDict
 
 
 class Template:
     def __init__(self, args):
-        self.config = yaml.load(open('config.yaml', 'r'), Loader=yaml.FullLoader)
+        self.config = AttrDict(yaml.load(open('config.yaml', 'r'), Loader=yaml.FullLoader))
         if args.dataset not in self.config['data_list']:
             raise KeyError("No such dataset named {}.".format(args.dataset))
         self.config['dataset'] = args.dataset
@@ -226,12 +227,13 @@ class Template:
             processed_list = list(map(self.execute, data_list))
         else:
             processed_list = self.execute(data_list)
-        pretrained_emb, emb_dim = self.build_pretrain_embedding(self.config['embedding_path'], self.alphabet, norm=True)
-        pkl.dump((processed_list, self.alphabet, pretrained_emb, emb_dim), open(self.config['res_path'].format(self.config['dataset']), 'wb'))
+        if self.config.use_pretrained:
+            self.build_pretrain_embedding(self.config['embedding_path'], self.alphabet, norm=True)
+        pkl.dump((processed_list, self.alphabet), open(self.config['res_path'].format(self.config['dataset']), 'wb'))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str, default='MR')
+    parser.add_argument('--dataset', type=str, default='SST2')
     args = parser.parse_args()
     template = Template(args)
     template.forward()
