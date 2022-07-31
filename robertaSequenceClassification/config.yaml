@@ -2,7 +2,8 @@ source_dir: ../data/SST2
 data_dir: ../data/preprocessed/{}
 target_dir: ../data/save/{}
 # bert_path: ../../../opt/embeddings/bert-base-cased
-bert_path: ../../../opt/embeddings/roberta-base
+# bert_path: ../../../opt/embeddings/roberta-base
+bert_path: roberta-base
 vocab_file: vocab.json
 merges_file: merges.txt
 # CLS: "[CLS]"

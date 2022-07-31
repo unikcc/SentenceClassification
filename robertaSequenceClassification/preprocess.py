@@ -27,10 +27,11 @@ class Preprocessor:
 
         # self.tokenizer = BertTokenizer.from_pretrained(self.bert_path)
         print(self.bert_path)
-        # self.tokenizer = AutoTokenizer.from_pretrained(self.bert_path, use_fast=False)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.bert_path)
         # self.tokenizer = AutoTokenizer.from_pretrained("../../../opt/embeddings/bert-base-cased", use_fast=False)
         # self.tokenizer = RobertaTokenizer.from_pretrained(self.bert_path, vocab_file=self.bert_path + self.vocab_file, merges_file=self.bert_path  + self.merges_file)
-        self.tokenizer = RobertaTokenizer(vocab_file=self.bert_path + '/' + self.vocab_file, merges_file=self.bert_path + '/' + self.merges_file)
+        # self.tokenizer = RobertaTokenizer(vocab_file=self.bert_path + '/' + self.vocab_file, merges_file=self.bert_path + '/' + self.merges_file)
+        # self.tokenizer = RobertaTokenizer.from
 
     def read_file(self, filename):
         # a = pd.read_csv(filename)

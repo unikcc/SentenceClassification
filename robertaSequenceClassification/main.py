@@ -10,13 +10,8 @@ import torch.nn as nn
 from sklearn.metrics import f1_score
 import yaml
 
-try:
-    from scripts.utils import MyDataLoader
-    from scripts.model import myClassification
-except:
-    from utils import MyDataLoader
-    from model import myClassification
-    from roberta_model import myClassification as myRobertaModel
+from utils import MyDataLoader
+from roberta_model import myClassification as myRobertaModel
 
 
 device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
@@ -116,15 +111,15 @@ class Pipeline:
         #config = PretrainedConfig.from_pretrained(self.bert_path, num_labels=2)
         # print(type(config))
         # config = BertConfig.from_json_file(os.path.join(self.bert_path, 'config.json'))
-        # config = BertConfig.from_pretrained(self.bert_path, num_labels=2)
-        config = RobertaConfig.from_json_file(self.bert_path + '/' + 'config.json')
+        config = RobertaConfig.from_pretrained(self.bert_path)
+        # config = RobertaConfig.from_json_file(self.bert_path + '/' + 'config.json')
 
         # alldata = MyDataLoader(self, mode='train').getdata(kfold=False)
         self.trainLoader = MyDataLoader(self, mode='train').getdata()
         self.validLoader = MyDataLoader(self, mode='valid').getdata()
         self.testLoader = MyDataLoader(self, mode='test').getdata()
 
-        self.tokenizer = RobertaTokenizer(vocab_file=self.bert_path + '/' + self.vocab_file, merges_file=self.bert_path + '/' + self.merges_file)
+        # self.tokenizer = RobertaTokenizer(vocab_file=self.bert_path + '/' + self.vocab_file, merges_file=self.bert_path + '/' + self.merges_file)
 
         if True:
         # for data in alldata:
