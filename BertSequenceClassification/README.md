@@ -1,23 +1,28 @@
-## SentenceClassification Model implemented with PyTorch
 ### `BertForSequenceClassification`代码使用流程
 
 
 **解压数据集**
+
 `unzip data.zip`
 
 **进入`Bert`代码目录**
+
 `cd BertForSequenceClassification`
 
 **安装依赖**
+
 `pip install -r requirements.txt`
 
 **预处理**
+
 `python preprocess.py`
+
 默认针对SST数据集
 
 **运行训练+测试**
 
 `python main.py`
+
 运行完毕之后，即可得到测试集的效果。
 
 **其他**
