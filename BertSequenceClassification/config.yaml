@@ -1,0 +1,22 @@
+source_dir: ../data/SST2
+data_dir: ./data/preprocessed/
+target_dir: ./data/save/
+# bert_path: ../../../opt/embeddings/bert-base-cased
+# bert_path: bert-base-cased
+bert_path: bert-base-cased
+CLS: [CLS]
+SEP: [SEP]
+batch_size: 32
+max_seq_length: 128
+learning_rate: 1e-5
+patience: 5
+max_grad_norm: 1.0
+fp16: use
+pair: use
+loss_scale: 0
+warmup_proportion: 0.1
+gradient_accumulation_steps: 1
+adam_epsilon: 1e-8
+warmup_steps: 0
+fp16_opt_level: O1
+epoch_size: 20

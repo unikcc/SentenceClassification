@@ -4,30 +4,26 @@ import os
 import sys
 import json
 from tqdm import tqdm
+import yaml
+from attrdict import AttrDict
 import torch
 from transformers import get_linear_schedule_with_warmup, AdamW, BertConfig
 import torch.nn as nn
 from sklearn.metrics import f1_score
-try:
-    from scripts.utils import MyDataLoader
-    from scripts.model import myClassification
-except:
-    from utils import MyDataLoader
-    from model import myClassification
-
+from utils import MyDataLoader
+from model import myClassification
 
 device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
+
 class Pipeline:
     def __init__(self):
-        basename = os.path.basename(os.getcwd())
-        config = json.load(open('config.json', 'r'))
-        for cfg in config:
-            self.__setattr__(cfg, config[cfg])
+        config = AttrDict(yaml.load(open('config.yaml', 'r', encoding='utf-8'), Loader=yaml.FullLoader))
+        config.device = device
 
-        self.data_dir = self.data_dir.format(basename)
-        self.target_dir = self.target_dir.format(basename)
-        if not os.path.exists(self.target_dir):
-            os.makedirs(self.target_dir)
+        if not os.path.exists(config.target_dir):
+            os.makedirs(config.target_dir)
+        self.config = config
 
     def train_iter(self):
         #print("size of", self.trainLoader.__len__())
@@ -45,7 +41,7 @@ class Pipeline:
             loss = self.criterion(out, input_labels)
 
             loss.backward()
-            nn.utils.clip_grad_norm_(self.model.parameters(), self.max_grad_norm)
+            nn.utils.clip_grad_norm_(self.model.parameters(), self.config.max_grad_norm)
 
             self.optimizer.step()
             self.scheduler.step()
@@ -62,7 +58,10 @@ class Pipeline:
 
     def evaluate_iter(self):
         self.model.eval()
-        dataiter = tqdm(self.validLoader, total=self.validLoader.__len__(), file=sys.stdout)
+        dataloader = self.validLoader
+        dataloader = self.testLoader
+        dataiter = tqdm(dataloader, total=dataloader.__len__(), file=sys.stdout)
+        # dataiter = tqdm(self.te, total=self.validLoader.__len__(), file=sys.stdout)
         res = []
         correct_count, count = 0, 0
         losses = 0.0
@@ -90,7 +89,7 @@ class Pipeline:
 
     def forward(self):
         best_score, best_iter = 0, 0
-        for epoch in range(self.epoch_size):
+        for epoch in range(self.config.epoch_size):
             self.global_epcoh = epoch
             self.train_iter()
             score, loss = self.evaluate_iter()
@@ -100,44 +99,36 @@ class Pipeline:
                 torch.save({'epoch': epoch,
                             'model': self.model.cpu().state_dict(),
                             'best_score': best_score},
-                           os.path.join(self.target_dir, "best_{}.pth.tar".format(0)))
+                           os.path.join(self.config.target_dir, "best_{}.pth.tar".format(0)))
                 self.model.to(device)
 
-            elif epoch - best_iter > self.patience:
-                print("Not upgrade for {} steps, early stopping...".format(self.patience))
+            elif epoch - best_iter > self.config.patience:
+                print("Not upgrade for {} steps, early stopping...".format(self.config.patience))
                 break
 
     def main(self):
-        #config = PretrainedConfig.from_pretrained(self.bert_path, num_labels=2)
-        # print(type(config))
-        # config = BertConfig.from_json_file(os.path.join(self.bert_path, 'config.json'))
-        config = BertConfig.from_pretrained(self.bert_path, num_labels=2)
-        # alldata = MyDataLoader(self, mode='train').getdata(kfold=False)
-        self.trainLoader = MyDataLoader(self, mode='train').getdata()
-        self.validLoader = MyDataLoader(self, mode='valid').getdata()
-        self.testLoader = MyDataLoader(self, mode='test').getdata()
-        if True:
-        # for data in alldata:
-            # self.trainLoader, self.validLoader = data
-            self.model = myClassification.from_pretrained(self.bert_path, config=config).to(device)
-            param_optimizer = list(self.model.named_parameters())
-            no_decay = ['bias', 'LayerNorm.weight']
-            optimizer_grouped_parameters = [
-                {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 1e-8},
-                {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 1e-8}
-            ]
+        config = BertConfig.from_pretrained(self.config.bert_path, num_labels=2)
+        self.trainLoader, self.validLoader, self.testLoader = MyDataLoader(self.config).getdata()
 
-            self.optimizer = AdamW(optimizer_grouped_parameters,
-                          lr=self.learning_rate,
-                          eps=self.adam_epsilon, weight_decay=1e-6)
-            # self.scheduler = WarmupLinearSchedule(self.optimizer, warmup_steps=self.warmup_steps,
-                                        #  t_total=self.epoch_size * self.trainLoader.__len__())
-            self.scheduler = get_linear_schedule_with_warmup(self.optimizer, num_warmup_steps=self.warmup_steps,
-                                         num_training_steps=self.epoch_size * self.trainLoader.__len__())
+        self.model = myClassification.from_pretrained(self.config.bert_path, config=config).to(device)
+        param_optimizer = list(self.model.named_parameters())
+        no_decay = ['bias', 'LayerNorm.weight']
+        optimizer_grouped_parameters = [
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 1e-8},
+            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 1e-8}
+        ]
+
+        self.optimizer = AdamW(optimizer_grouped_parameters,
+                        lr=float(self.config.learning_rate),
+                        eps=float(self.config.adam_epsilon), weight_decay=1e-6)
+        # self.scheduler = WarmupLinearSchedule(self.optimizer, warmup_steps=self.warmup_steps,
+                                    #  t_total=self.epoch_size * self.trainLoader.__len__())
+        self.scheduler = get_linear_schedule_with_warmup(self.optimizer, num_warmup_steps=self.config.warmup_steps,
+                                        num_training_steps=self.config.epoch_size * self.trainLoader.__len__())
 
 
-            self.criterion = nn.CrossEntropyLoss()
-            self.forward()
+        self.criterion = nn.CrossEntropyLoss()
+        self.forward()
 
 
 

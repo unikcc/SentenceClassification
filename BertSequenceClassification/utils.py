@@ -9,40 +9,44 @@ from sklearn.model_selection import KFold
 
 class MyDataset(Dataset):
     def __init__(self, data):
-        self.string_ids, self.input_ids, self.input_segments, \
-        self.input_masks, self.input_labels = data
+        self.data = data
+        # self.string_ids, self.input_ids, self.input_segments, \
+        # self.input_masks, self.input_labels = data
 
     def __getitem__(self, index):
-        return {
-            "input_ids": torch.tensor(self.input_ids[index]),
-            "input_masks": torch.tensor(self.input_masks[index]),
-            "input_segments": torch.tensor(self.input_segments[index]),
-            "input_labels": torch.tensor(self.input_labels[index])
-        }
+        return self.data[index]
 
     def __len__(self):
-        return len(self.string_ids)
+        return len(self.data)
 
 
 class MyDataLoader:
     def __init__(self, args, mode='train'):
         self.args = args
-
-        path = os.path.join(args.data_dir, '{}.pkl'.format(mode))
+        path = os.path.join(args.data_dir, 'data.pkl')
         self.data = pkl.load(open(path, 'rb'))
+    
+    def collate(self, batch_data):
+        string_ids, input_ids, input_masks, input_segments, input_labels = list(zip(*batch_data))
+        max_len = min(len(input_ids), self.args.max_seq_length)
+        input_ids = [(w + [0] * max_len)[:max_len] for w in input_ids]
+        input_masks = [(w + [0] * max_len)[:max_len] for w in input_masks]
+        input_segments = [(w + [0] * max_len)[:max_len] for w in input_segments]
 
-    def getdata(self, kfold=False):
-        if kfold:
-            kf = KFold(n_splits=5)
-            res = []
-            for train_index, test_index in kf.split(self.data[0], self.data[-1]):
-                train_data = [[p[w] for w in train_index] for p in self.data]
-                test_data = [[p[w] for w in test_index] for p in self.data]
-                train_loader = DataLoader(MyDataset(train_data), shuffle=True, batch_size=self.args.batch_size)
-                test_loader = DataLoader(MyDataset(test_data), shuffle=True, batch_size=self.args.batch_size)
-                res.append((train_loader, test_loader))
-            return res
+        res = {
+            'input_ids': torch.tensor(input_ids).to(self.args.device),
+            'input_masks': torch.tensor(input_masks).to(self.args.device),
+            'input_segments': torch.tensor(input_segments).to(self.args.device),
+            'input_labels': torch.tensor(input_labels).to(self.args.device),
+        }
 
-        return DataLoader(MyDataset(self.data), shuffle=True, batch_size=self.args.batch_size)
+        return res
 
-
+    def getdata(self):
+        modes = 'train valid test'
+        res = []
+        for i, mode in enumerate(modes.split()):
+            cur_data = self.data[i]
+            r = DataLoader(MyDataset(cur_data), shuffle=True, batch_size=self.args.batch_size, collate_fn=self.collate)
+            res.append(r)
+        return res
